@@ -1,54 +1,41 @@
 import tkinter as tk
+import util
+
+# Global variable to store the selected algorithm
+selected_algorithm = None
 
 def on_alg_button_click(algorithm):
-    # Open the algorithm page based on the selected algorithm
-    if algorithm == "MiniMax":
-        open_MiniMax_page()
-    elif algorithm == "MiniMax-Alpha-Beta":
-        open_MiniMax_Alpha_Beta_page()
-    elif algorithm == "MiniMax-Hauristic-Basic":
-        open_MiniMax_Hauristic_Basic_page()
-    elif algorithm == "MiniMax-Hauristic-Advanced":
-        open_MiniMax_Hauristic_Advanced_page()
+    global selected_algorithm
+    selected_algorithm = algorithm
+    root.destroy()  # Close the selection window
+    util.main(selected_algorithm)  # Pass the selected algorithm to the main function
 
+def create_algorithm_selection_window():
+    global root
+    root = tk.Tk()
+    root.title("Tic-Tac-Toe Game")
 
-def open_MiniMax_page():
-    root.destroy()
-    import minimax
+    # Create a frame for the algorithm selection
+    frame = tk.Frame(root)
+    frame.pack(pady=20)
 
-def  open_MiniMax_Alpha_Beta_page():
-    root.destroy()
-    import minimax_alpha_beta
+    # Create a label for instructions
+    label = tk.Label(frame, text="Choose an algorithm to solve the Tic-Tac-Toe problem:", font=("Arial", 14))
+    label.pack(pady=10)
 
-def open_MiniMax_Hauristic_Basic_page():
-    root.destroy()
-    import minimax_hauristic_basic
+    # Create algorithm buttons
+    alg_buttons = [
+        ("MiniMax", "minimax"),
+        ("MiniMax-Alpha-Beta", "minimax_alpha_beta"),
+        ("MiniMax-Heuristic-Basic", "minimax_heuristic_basic"),
+        ("MiniMax-Heuristic-Advanced", "minimax_heuristic_advanced")
+    ]
 
-def open_MiniMax_Hauristic_Advanced_page():
-    root.destroy()
-    import minimax_hauristic_advanced
+    for alg_name, alg_value in alg_buttons:
+        button = tk.Button(frame, text=alg_name, font=("Arial", 12), width=25, height=2, command=lambda alg=alg_value: on_alg_button_click(alg))
+        button.pack(pady=5)
 
-root = tk.Tk()
-root.title("Tic-Tac-Toe Game")
+    root.mainloop()
 
-# Create a frame for the algorithm selection
-frame = tk.Frame(root)
-frame.pack(pady=20)
-
-# Create a label for instructions
-label = tk.Label(frame, text="Choose an algorithm to solve the Tic-Tac-Toe problem:", font=("Arial", 14))
-label.pack(pady=10)
-
-# Create algorithm buttons
-alg_buttons = [
-    ("MiniMax",open_MiniMax_page),
-    ("MiniMax-Alpha-Beta",  open_MiniMax_Alpha_Beta_page),
-    ("MiniMax-Hauristic-Basic",open_MiniMax_Hauristic_Basic_page),
-    ("MiniMax-Hauristic-Advanced", open_MiniMax_Hauristic_Advanced_page)
-]
-
-for alg_name, alg_func in alg_buttons:
-    button = tk.Button(frame, text=alg_name, font=("Arial", 12), width=25, height=2, command=lambda alg=alg_name: on_alg_button_click(alg))
-    button.pack(pady=5)
-
-root.mainloop()
+if __name__ == "__main__":
+    create_algorithm_selection_window()

@@ -1,6 +1,6 @@
 import sys
 import pygame
-import numpy
+import numpy as np
 import minimax
 import minimax_heuristic_basic
 import minimax_alpha_beta
@@ -30,7 +30,7 @@ CROSS_WIDTH = 25
 screen = pygame.display.set_mode((WIDTH , HEIGHT))
 pygame.display.set_caption("Tic Tac Toe AI")
 screen.fill(BLACK)
-board = numpy.zeros((BOARD_ROWS , BOARD_COLUMNS))
+board = np.zeros((BOARD_ROWS , BOARD_COLUMNS))
 
 
 def draw_lines(color =WHITE):
@@ -82,7 +82,7 @@ def check_win(player, check_board = board):
     return False
 
 def restart_game():
-    board = numpy.zeros((BOARD_ROWS , BOARD_COLUMNS))
+    board = np.zeros((BOARD_ROWS , BOARD_COLUMNS))
 
 def best_move(algorithm):
     """Determine the best move using a basic heuristic."""
@@ -110,6 +110,26 @@ def best_move(algorithm):
         mark_square(move[0], move[1], 2)
         return True
     return False
+
+def canonical_form(board):
+    """Generate the canonical form of the board considering all symmetries."""
+    transformations = [
+        lambda b: b,  # Original
+        lambda b: np.rot90(b),  # 90 degree rotation
+        lambda b: np.rot90(b, 2),  # 180 degree rotation
+        lambda b: np.rot90(b, 3),  # 270 degree rotation
+        lambda b: np.fliplr(b),  # Horizontal flip
+        lambda b: np.flipud(b),  # Vertical flip
+        lambda b: np.fliplr(np.rot90(b)),  # Horizontal flip and 90 degree rotation
+        lambda b: np.flipud(np.rot90(b)),  # Vertical flip and 90 degree rotation
+    ]
+    
+    min_board = board
+    for transform in transformations:
+        transformed_board = transform(board)
+        if np.lexsort(transformed_board.flatten()) < np.lexsort(min_board.flatten()):
+            min_board = transformed_board
+    return min_board
 
 
 

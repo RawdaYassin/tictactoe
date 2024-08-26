@@ -1,7 +1,19 @@
+import numpy as np
 import util
 
+# Memoization dictionary
+memo = {}
+
 def minimax(board, depth, is_maximizing):
-    """Minimax algorithm."""
+    """Minimax algorithm with symmetry reduction."""
+    # Get the canonical form of the board
+    canonical_board = util.canonical_form(board).tostring()
+
+    # Check if this board state has been evaluated before
+    if canonical_board in memo:
+        return memo[canonical_board]
+
+    # Check terminal states
     if util.check_win(2):
         return float('inf')
     if util.check_win(1):
@@ -10,6 +22,8 @@ def minimax(board, depth, is_maximizing):
         return 0
 
     best_score = float('-inf') if is_maximizing else float('inf')
+    
+    # Iterate over all possible moves
     for row in range(util.BOARD_ROWS):
         for col in range(util.BOARD_COLUMNS):
             if board[row][col] == 0:
@@ -20,26 +34,7 @@ def minimax(board, depth, is_maximizing):
                     best_score = max(score, best_score)
                 else:
                     best_score = min(score, best_score)
+    
+    # Memoize the result for the canonical form
+    memo[canonical_board] = best_score
     return best_score
-
-"""
-def best_move():
-    Determine the best move using minimax.
-    best_score = float('-inf')
-    move = (-1, -1)
-    for row in range(util.BOARD_ROWS):
-        for col in range(util.BOARD_COLUMNS):
-            if util.board[row][col] == 0:
-                util.board[row][col] = 2
-                score = minimax(util.board, 0, False)
-                util.board[row][col] = 0
-                if score > best_score:
-                    best_score = score
-                    move = (row, col)
-
-    if move != (-1, -1):
-        util.mark_square(move[0], move[1], 2)
-        return True
-    return False
-
-"""

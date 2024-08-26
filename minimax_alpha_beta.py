@@ -1,7 +1,19 @@
+import numpy as np
 import util
 
+# Memoization dictionary
+memo = {}
+
 def minimax_alpha_beta(board, depth, is_maximizing, alpha, beta):
-    """Minimax algorithm with alpha-beta pruning."""
+    """Minimax algorithm with alpha-beta pruning and symmetry reduction."""
+    # Get the canonical form of the board
+    canonical_board = util.canonical_form(board).tostring()
+
+    # Check if this board state has been evaluated before
+    if canonical_board in memo:
+        return memo[canonical_board]
+
+    # Check terminal states
     if util.check_win(2):
         return float('inf')
     if util.check_win(1):
@@ -21,6 +33,8 @@ def minimax_alpha_beta(board, depth, is_maximizing, alpha, beta):
                     alpha = max(alpha, best_score)
                     if beta <= alpha:
                         break
+        # Memoize the result for the canonical form
+        memo[canonical_board] = best_score
         return best_score
     else:
         best_score = float('inf')
@@ -34,28 +48,6 @@ def minimax_alpha_beta(board, depth, is_maximizing, alpha, beta):
                     beta = min(beta, best_score)
                     if beta <= alpha:
                         break
+        # Memoize the result for the canonical form
+        memo[canonical_board] = best_score
         return best_score
-
-"""
-def best_move_with_alpha_beta():
-   Determine the best move using minimax with alpha-beta pruning.
-    best_score = float('-inf')
-    move = (-1, -1)
-    alpha = float('-inf')
-    beta = float('inf')
-    
-    for row in range(util.BOARD_ROWS):
-        for col in range(util.BOARD_COLUMNS):
-            if util.board[row][col] == 0:
-                util.board[row][col] = 2
-                score = minimax_alpha_beta(util.board, 0, False, alpha, beta)
-                util.board[row][col] = 0
-                if score > best_score:
-                    best_score = score
-                    move = (row, col)
-    
-    if move != (-1, -1):
-        util.mark_square(move[0], move[1], 2)
-        return True
-    return False
- """

@@ -1,6 +1,5 @@
 import util
 
-
 def minimax_alpha_beta(board, depth, is_maximizing, alpha, beta):
     """Minimax algorithm with alpha-beta pruning."""
     if util.check_win(2):
@@ -37,9 +36,9 @@ def minimax_alpha_beta(board, depth, is_maximizing, alpha, beta):
                         break
         return best_score
 
-
+"""
 def best_move_with_alpha_beta():
-    """Determine the best move using minimax with alpha-beta pruning."""
+   Determine the best move using minimax with alpha-beta pruning.
     best_score = float('-inf')
     move = (-1, -1)
     alpha = float('-inf')
@@ -59,4 +58,4 @@ def best_move_with_alpha_beta():
         util.mark_square(move[0], move[1], 2)
         return True
     return False
-
+ """

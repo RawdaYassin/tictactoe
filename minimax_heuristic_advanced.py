@@ -47,9 +47,9 @@ def evaluate_line_advanced(line, player):
     return score
 
 
-
+"""
 def best_move_heuristic_advanced():
-    """Determine the best move using an advanced heuristic."""
+    Determine the best move using an advanced heuristic.
     best_score = float('-inf')
     move = (-1, -1)
     
@@ -68,7 +68,7 @@ def best_move_heuristic_advanced():
         return True
     return False
 
-
+"""
 
 
 

@@ -26,9 +26,9 @@ def create_algorithm_selection_window():
     # Create algorithm buttons
     alg_buttons = [
         ("MiniMax", "minimax"),
-        ("MiniMax-Alpha-Beta", "minimax_alpha_beta"),
-        ("MiniMax-Heuristic-Basic", "minimax_heuristic_basic"),
-        ("MiniMax-Heuristic-Advanced", "minimax_heuristic_advanced")
+        ("MiniMax Alpha Beta", "minimax_alpha_beta"),
+        ("MiniMax First Heuristic", "minimax_heuristic_basic"),
+        ("MiniMax Second Heuristic", "minimax_heuristic_advanced")
     ]
 
     for alg_name, alg_value in alg_buttons:

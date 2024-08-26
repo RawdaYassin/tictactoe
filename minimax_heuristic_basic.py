@@ -1,54 +1,39 @@
 import util
-import numpy
+import numpy as np
 
-def minimax_heuristic_basic(board):
-    """Evaluate the board state using a basic heuristic."""
+def minimax_heuristic_basic(board, player):
+    """Evaluate the board state for Player 2 by calculating potential winning possibilities for each move."""
     score = 0
+    opponent = 1 
+    player = 2
+
+    # Evaluate all rows, columns, and diagonals
     for i in range(util.BOARD_ROWS):
         row = board[i]
         col = [board[j][i] for j in range(util.BOARD_COLUMNS)]
-        score += evaluate_line(row)
-        score += evaluate_line(col)
+        score += evaluate_line(row, player, opponent)
+        score += evaluate_line(col, player, opponent)
 
     diag1 = [board[i][i] for i in range(util.BOARD_ROWS)]
     diag2 = [board[i][util.BOARD_COLUMNS - 1 - i] for i in range(util.BOARD_ROWS)]
-    score += evaluate_line(diag1)
-    score += evaluate_line(diag2)
+    score += evaluate_line(diag1, player, opponent)
+    score += evaluate_line(diag2, player, opponent)
 
     return score
 
+def evaluate_line(line, player, opponent):
+    """Evaluate a line for potential winning possibilities for Player 2 and blocking the opponent."""
+    score = 0
 
-def evaluate_line(line):
-    """Evaluate a line for the heuristic."""
-    if numpy.sum(line == 2) == 3:
-        return 10
-    elif numpy.sum(line == 1) == 3:
-        return -10
-    elif numpy.sum(line == 2) == 2 and numpy.sum(line == 0) == 1:
-        return 5
-    elif numpy.sum(line == 1) == 2 and numpy.sum(line == 0) == 1:
-        return -5
-    return 0
+    if np.sum(line == player) == 3:
+        score += 100  
+    elif np.sum(line == player) == 2 and np.sum(line == 0) == 1:
+        score += 10  
 
+    if np.sum(line == opponent) == 3:
+        score -= 100  
+    elif np.sum(line == opponent) == 2 and np.sum(line == 0) == 1:
+        score -= 10  
 
-def best_move_heuristic_basic():
-    """Determine the best move using a basic heuristic."""
-    best_score = float('-inf')
-    move = (-1, -1)
-
-    for row in range(util.BOARD_ROWS):
-        for col in range(util.BOARD_COLUMNS):
-            if util.board[row][col] == 0:
-                util.board[row][col] = 2
-                score = minimax_heuristic_basic(util.board)
-                util.board[row][col] = 0
-                if score > best_score:
-                    best_score = score
-                    move = (row, col)
-
-    if move != (-1, -1):
-        util.mark_square(move[0], move[1], 2)
-        return True
-    return False
-
+    return score
 

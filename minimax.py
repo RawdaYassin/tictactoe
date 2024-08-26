@@ -22,9 +22,9 @@ def minimax(board, depth, is_maximizing):
                     best_score = min(score, best_score)
     return best_score
 
-
+"""
 def best_move():
-    """Determine the best move using minimax."""
+    Determine the best move using minimax.
     best_score = float('-inf')
     move = (-1, -1)
     for row in range(util.BOARD_ROWS):
@@ -42,3 +42,4 @@ def best_move():
         return True
     return False
 
+"""

@@ -4,6 +4,7 @@ import numpy
 import minimax
 import minimax_heuristic_basic
 import minimax_alpha_beta
+import test
 import minimax_heuristic_advanced
 
 pygame.init()
@@ -83,6 +84,34 @@ def check_win(player, check_board = board):
 def restart_game():
     board = numpy.zeros((BOARD_ROWS , BOARD_COLUMNS))
 
+def best_move(algorithm):
+    """Determine the best move using a basic heuristic."""
+    best_score = float('-inf')
+    move = (-1, -1)
+
+    for row in range(BOARD_ROWS):
+        for col in range(BOARD_COLUMNS):
+            if board[row][col] == 0:
+                board[row][col] = 2
+                if algorithm == "minimax":
+                    score = minimax.minimax(board, 0, False)     
+                elif algorithm == "minimax_alpha_beta":
+                    score = minimax_alpha_beta.minimax_alpha_beta(board, 0, False,  float('-inf'),  float('inf'))     
+                elif algorithm == "minimax_heuristic_basic":
+                    score = test.heuristic_function_1(board, row, col)           
+                elif algorithm == "minimax_heuristic_advanced":
+                    score = test.heuristic_function_2(board, row, col)      
+                board[row][col] = 0
+                if score > best_score:
+                    best_score = score
+                    move = (row, col)
+
+    if move != (-1, -1):
+        mark_square(move[0], move[1], 2)
+        return True
+    return False
+
+
 
 def main(algorithm):
     draw_lines()
@@ -104,28 +133,11 @@ def main(algorithm):
                     if check_win(player):
                         game_over = True
                     player = player % 2 + 1
-                    
                     if not game_over:
-                        if algorithm == "minimax":
-                            if minimax.best_move():
-                                if check_win(2):
-                                    game_over = True
-                                player = player % 2 + 1
-                        elif algorithm == "minimax_alpha_beta":
-                            if minimax_alpha_beta.best_move_with_alpha_beta():
-                                if check_win(2):
-                                    game_over = True
-                                player = player % 2 + 1
-                        elif algorithm == "minimax_heuristic_basic":
-                            if minimax_heuristic_basic.best_move_heuristic_basic():
-                                if check_win(2):
-                                    game_over = True
-                                player = player % 2 + 1
-                        elif algorithm == "minimax_heuristic_advanced":
-                            if minimax_heuristic_advanced.best_move_heuristic_advanced():
-                                if check_win(2):
-                                    game_over = True
-                                player = player % 2 + 1
+                        if best_move(algorithm):
+                            if check_win(2):
+                                game_over = True
+                            player = player % 2 + 1
                             
                     if not game_over:
                         if is_board_full():

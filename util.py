@@ -4,9 +4,8 @@ import numpy as np
 import minimax
 import minimax_heuristic_basic
 import minimax_alpha_beta
-import test
-import minimax_heuristic_advanced
-
+import tt
+import home
 pygame.init()
 
 # Colors
@@ -15,10 +14,16 @@ GREY = (150, 150, 150)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
+BACKGROUND_COLOR = (240, 240, 240)
+BUTTON_COLOR = (0, 123, 255)  # Blue color for buttons
+BUTTON_HOVER_COLOR = (0, 102, 204)  # Darker blue for hover
+STOP_COLOR = (220, 53, 69)  # Red color for Stop button
+RESTART_COLOR = (40, 167, 69)  # Green color for Restart button
+TEXT_COLOR = (255, 255, 255)
 
 # Proportions & Sizes
-WIDTH = 300
-HEIGHT = 300
+WIDTH = 400
+HEIGHT = 400
 LINE_WIDTH = 5
 BOARD_ROWS = 3
 BOARD_COLUMNS = 3
@@ -27,10 +32,23 @@ CIRCLE_RADIUS = SQUARE_SIZE // 3
 CIRCLE_WIDTH = 15
 CROSS_WIDTH = 25
 
-screen = pygame.display.set_mode((WIDTH , HEIGHT))
+screen = pygame.display.set_mode((WIDTH , HEIGHT ))
+
+#button_screen = pygame.display.set_mode((WIDTH ,  100))
 pygame.display.set_caption("Tic Tac Toe AI")
+#all_screen.fill(WHITE)
 screen.fill(BLACK)
 board = np.zeros((BOARD_ROWS , BOARD_COLUMNS))
+font = pygame.font.SysFont('Arial', 24)
+# Define button rectangles
+stop_button_rect = pygame.Rect(WIDTH // 4 - 50, HEIGHT - 80, 100, 60)
+restart_button_rect = pygame.Rect(3 * WIDTH // 4 - 50, HEIGHT - 80, 100, 60)
+
+def draw_button(color, text, rect):
+    pygame.draw.rect(screen, color, rect)
+    text_surface = font.render(text, True, TEXT_COLOR)
+    text_rect = text_surface.get_rect(center=rect.center)
+    screen.blit(text_surface, text_rect)
 
 
 def draw_lines(color =WHITE):
@@ -82,7 +100,8 @@ def check_win(player, check_board = board):
     return False
 
 def restart_game():
-    board = np.zeros((BOARD_ROWS , BOARD_COLUMNS))
+    global board  # Access the global board variable
+    board = np.zeros((3, 3))  # Reset the board to a 3x3 array of zeros
 
 def best_move(algorithm):
     """Determine the best move using a basic heuristic."""
@@ -98,9 +117,9 @@ def best_move(algorithm):
                 elif algorithm == "minimax_alpha_beta":
                     score = minimax_alpha_beta.minimax_alpha_beta(board, 0, False,  float('-inf'),  float('inf'))     
                 elif algorithm == "minimax_heuristic_basic":
-                    score = test.heuristic_function_1(board, row, col)           
+                    score = minimax_heuristic_basic.heuristic_function_1(board, row, col)           
                 elif algorithm == "minimax_heuristic_advanced":
-                    score = test.heuristic_function_2(board, row, col)      
+                    score = minimax_heuristic_basic.heuristic_function_2(board, row, col)      
                 board[row][col] = 0
                 if score > best_score:
                     best_score = score
@@ -131,57 +150,88 @@ def canonical_form(board):
             min_board = transformed_board
     return min_board
 
+def is_winning_move(board, player):
+    """Check if the given player has a winning move on the board."""
+    for i in range(3):
+        if board[i][0] == board[i][1] == board[i][2] == player:
+            return True
+        if board[0][i] == board[1][i] == board[2][i] == player:
+            return True
+    if board[0][0] == board[1][1] == board[2][2] == player:
+        return True
+    if board[0][2] == board[1][1] == board[2][0] == player:
+        return True
+    return False
 
-
+def show_endgame_menu(screen):
+    # Draw the endgame menu
+    screen.fill(BACKGROUND_COLOR)
+    #draw_lines()  # Redraw the board lines to ensure they appear correctly
+    #draw_figures()  # Redraw the figures if necessary
+    draw_button(STOP_COLOR, 'Stop', stop_button_rect)
+    draw_button(RESTART_COLOR, 'Restart', restart_button_rect)
+    
+    pygame.display.update()
 def main(algorithm):
-    draw_lines()
     player = 1
     game_over = False
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
                 sys.exit()
                 
-            if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 mouseX, mouseY = event.pos
-                row = mouseY // SQUARE_SIZE
-                column = mouseX // SQUARE_SIZE
-                
-                if available_square(row, column):
-                    mark_square(row, column, player)
-                    if check_win(player):
-                        game_over = True
-                    player = player % 2 + 1
-                    if not game_over:
-                        if best_move(algorithm):
-                            if check_win(2):
-                                game_over = True
-                            player = player % 2 + 1
-                            
-                    if not game_over:
-                        if is_board_full():
+
+                if game_over:
+                    if stop_button_rect.collidepoint(mouseX, mouseY):
+                        pygame.quit()
+                        sys.exit()
+                    
+                    if restart_button_rect.collidepoint(mouseX, mouseY):
+                        restart_game()
+                        #main(algorithm)
+                        home.create_algorithm_selection_window()  # This will call main with the selected algorithm
+
+                else:
+                    row = mouseY // SQUARE_SIZE
+                    column = mouseX // SQUARE_SIZE
+                    
+                    if available_square(row, column):
+                        mark_square(row, column, player)
+                        if check_win(player):
                             game_over = True
-                            
-            
+                        player = player % 2 + 1
+                        if not game_over:
+                            if tt.best_move(algorithm):  # Replace with actual algorithm call
+                                if check_win(2):
+                                    game_over = True
+                                player = player % 2 + 1
+                                
+                        if not game_over:
+                            if is_board_full():
+                                game_over = True
+
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.k_r:
+                if event.key == pygame.K_r:
                     restart_game()
-                    game_over = False
-                    player = 1
         
+        screen.fill(BLACK)
         if not game_over:
+            draw_lines()
             draw_figures()
         else:
             if check_win(1):
                 draw_figures(GREEN)
-                draw_lines(GREEN)
+                draw_lines()
             elif check_win(2):
                 draw_figures(RED)
-                draw_lines(RED)
+                draw_lines()
             else:
                 draw_figures(GREY)
-                draw_lines(GREY)
+                draw_lines()
+            show_endgame_menu(screen)
             
         pygame.display.update()
-        

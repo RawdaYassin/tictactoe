@@ -1,90 +1,79 @@
 import util
-import numpy
+import numpy as np
 
-def minimax_heuristic_advanced(board):
-    """Evaluate the board state using an advanced heuristic."""
-    score = 0
-    for i in range(util.BOARD_ROWS):
-        row = board[i]
-        col = [board[j][i] for j in range(util.BOARD_COLUMNS)]
-        score += evaluate_line_advanced(row, 2)
-        score -= evaluate_line_advanced(row, 1)
-        score += evaluate_line_advanced(col, 2)
-        score -= evaluate_line_advanced(col, 1)
+def heuristic_function_2(board, row, col):
+    player = 2
+    board = util.canonical_form(board).copy()  # Apply symmetry reduction and work on a copy
+    
+    # Place the player's move
+    board[row][col] = 1
+    if util.is_winning_move(board, 1):
+        return 1000  # Immediate win
+    
+    # Restore the board state for the player's move
+    board[row][col] = 2
+    
+    def line_weight(line, player):
+        """Assign weight based on the number of player marks in the line."""
+        player_count = np.sum(line == player)
+        empty_count = np.sum(line == 0)
+        opponent = 1 if player == 2 else 2
+        opponent_count = np.sum(line == opponent)
 
-    diag1 = [board[i][i] for i in range(util.BOARD_ROWS)]
-    diag2 = [board[i][util.BOARD_COLUMNS - 1 - i] for i in range(util.BOARD_ROWS)]
-    
-    score += evaluate_line_advanced(diag1, 2)
-    score -= evaluate_line_advanced(diag1, 1)
-    score += evaluate_line_advanced(diag2, 2)
-    score -= evaluate_line_advanced(diag2, 1)
-    
-    return score
-
-def evaluate_line_advanced(line, player):
-    """Evaluate a line for the advanced heuristic."""
-    opponent = 2 if player == 1 else 1
-    
-    # Convert line to a numpy array if it's not already
-    line = numpy.array(line)
-    
-    player_count = numpy.sum(line == player)
-    opponent_count = numpy.sum(line == opponent)
-    empty_count = numpy.sum(line == 0)
-    score = 0
-    
-    if player_count == 2 and empty_count == 1:
-        score += 20
-    elif player_count == 1 and empty_count == 2:
-        score += 5
+        if opponent_count > 0:
+            return 0
         
-    if opponent_count == 2 and empty_count == 1:
-        score -= 20
-    elif opponent_count == 1 and empty_count == 2:
-        score -= 5
-
-    return score
-
-
-"""
-def best_move_heuristic_advanced():
-    Determine the best move using an advanced heuristic.
-    best_score = float('-inf')
-    move = (-1, -1)
+        if player_count == 2 and empty_count == 1:
+            return 100
+        elif player_count == 1 and empty_count == 2:
+            return 10
+        elif player_count == 0 and empty_count == 3:
+            return 1
+        else:
+            return 0
     
-    for row in range(util.BOARD_ROWS):
-        for col in range(util.BOARD_COLUMNS):
-            if util.board[row][col] == 0:
-                util.board[row][col] = 2
-                score = minimax_heuristic_advanced(util.board)
-                util.board[row][col] = 0
-                if score > best_score:
-                    best_score = score
-                    move = (row, col)
+    def get_main_diagonal(board, start_row, start_col):
+        """Get the main diagonal (top-left to bottom-right)."""
+        diag = []
+        r, c = start_row, start_col
+        while r < 3 and c < 3:
+            diag.append(board[r, c])
+            r += 1
+            c += 1
+        return np.array(diag)
     
-    if move != (-1, -1):
-        util.mark_square(move[0], move[1], 2)
-        return True
-    return False
+    def get_anti_diagonal(board, start_row, start_col):
+        """Get the anti-diagonal (top-right to bottom-left)."""
+        diag = []
+        r, c = start_row, start_col
+        while r < 3 and c >= 0:
+            diag.append(board[r, c])
+            r += 1
+            c -= 1
+        return np.array(diag)
 
-"""
+    def count_winning_lines_for_player(board, player, row, col):
+        """Count and weight how many winning lines are possible for the given player."""
+        winning_lines = 0
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        # Check row
+        row_line = board[row, :]
+        winning_lines += line_weight(row_line, player)
+        
+        # Check column
+        col_line = board[:, col]
+        winning_lines += line_weight(col_line, player)
+        
+        # Check main diagonal (top-left to bottom-right)
+        diag_main = get_main_diagonal(board, row, col)
+        winning_lines += line_weight(diag_main, player)
+        
+        # Check anti-diagonal (top-right to bottom-left)
+        diag_anti = get_anti_diagonal(board, row, col)
+        winning_lines += line_weight(diag_anti, player)
+        
+        return winning_lines
+    
+    return count_winning_lines_for_player(board, player, row, col)
 
 
